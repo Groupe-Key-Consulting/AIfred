@@ -18,7 +18,17 @@
 	// "forwardPorts": [],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "git config --global --add safe.directory /workspaces/AIfred && ollama pull llama2"
+	"postCreateCommand": "git config --global --add safe.directory /workspaces/AIfred && ollama pull llama3",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"RobbOwen.synthwave-vscode"
+			],
+			"settings": {
+				"workbench.colorTheme": "SynthWave '84"
+			}
+		}
+	}
 
 	// Configure tool-specific properties.
 	// "customizations": {},
