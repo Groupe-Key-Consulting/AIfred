@@ -2,7 +2,7 @@ import ollama
 import os
 import subprocess
 
-model="llama3"
+model="llama3.1"
 context="""I am an automated program (in the form of a python script). 
     A user is talking to me, and through me to you: I will forward the user input to you and ask you to help me understand it.
     You are an AI designed to understand the user's requests and help me run the adequate checks and processes. Your name is AIfred.
@@ -32,6 +32,7 @@ def process_query(query):
       - Category Name: 'LIST_FILES', for when the user asks for a list of files,
       - Category Name: 'FIND_FILE', for when the user is trying to find a file or a folder,
       - Category Name: 'FILE_INFO', for when the user is trying to get other information about files or folders,
+      - Category Name: 'FILE_NAME', for when the user is asking about file names,
       - Category Name: 'OTHER', for the rest of the cases, when the user is asking something else.
    
     Your answer must not contain anything else than one of the category names I gave you.
@@ -42,12 +43,24 @@ def process_query(query):
     The user input is: {query}"""
     category_response = ollama.generate(model=model, prompt=category_prompt)
     category = category_response['response'].strip()
-    print("llama2 response for categorization:", category);
+    print(f"{model} response for categorization: {category}");
 
     if category == "LIST_FILES":
         files = os.listdir('.')
         return f"Files in current directory: {files}"
     
+    elif category == "FILE_NAME":
+        files = get_file_info()
+        # map file info to a string with file names and sizes
+        files_str = ', '.join([f"{file[0]} ({file[1]} bytes)" for file in files])
+        prompt = f"""Given these files, answer the user's query:
+          {files_str}
+
+          User query: {query}"""
+        print("Prompt for file name extraction:", prompt)
+        response = ollama.generate(model=model, prompt=prompt)
+        return response['response']
+
     elif category == "FIND_FILE":
         file_prompt = f"Extract the file or directory name to search for from the user input. This program does not understand natural language so please simply answer the path name and nothing else, do not introduce your answer either. For instance if the user input is 'Where is document.txt in my computer?' you would simply answer with 'document.txt' without the quotes. User query: {query}"
         file_response = ollama.generate(model=model, prompt=file_prompt)
